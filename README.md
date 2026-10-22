@@ -4,7 +4,7 @@
 
 **Presentation:** [open the slides](https://claude.ai/artifact/Qsz1obyqwfsjxnZFMKY6LM)
 
-**Team:** [Team member names]
+**Team:** Andrea, Walid, Ghali & Paul
 
 ---
 
