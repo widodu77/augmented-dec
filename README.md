@@ -2,8 +2,6 @@
 
 **A decision tree on the UCI Heart Disease data.** Final project for *Augmented Decision: Statistical Learning, Risk and Optimization* (2026).
 
-**Presentation:** [open the slides](https://claude.ai/artifact/Qsz1obyqwfsjxnZFMKY6LM)
-
 **Team:** Andrea, Walid, Ghali & Paul
 
 ---
