@@ -57,7 +57,7 @@ Figure: `02_depth_tuning.png`
 ## 7. The final tree
 Figures: `03_final_tree.png`, `04_feature_importance.png`
 
-- The first question is: is the chest pain "asymptomatic"? (This means no typical chest pain. In this dataset it is the strongest warning sign.)
+- The first question is: is the chest pain "asymptomatic"? (This means the patient reports no chest pain. In this dataset it is the strongest warning sign, because of how patients were selected: see the questions at the end.)
 - Next come the number of blocked vessels on fluoroscopy, the thallium test result, and ST depression.
 - Read out one path: "Asymptomatic pain and at least 1 vessel coloured: 55 of 58 training patients were sick."
 - Most important variables: chest pain asymptomatic (43%), n_vessels (19%), thal reversible defect (15%).
@@ -93,13 +93,14 @@ Loss table, with costs in units of one angiography:
 | 5 | 2.33 | **1.00** | 1.04 |
 | 10 | 4.67 | **1.00** | 1.23 |
 
-- Say: "If missing a sick patient costs less than about 4–5 angiographies, the tree saves cost. If a miss is worse than that, the tree is not safe enough, and you should just test everyone."
+- Say: "If missing a sick patient costs less than about 4.7 angiographies, the tree saves cost. If a miss is worse than that, the tree is not safe enough, and you should just test everyone."
 
 ## 10. Recommendation and limitations
-**Recommendation:** use the depth-4 tree as a **triage aid** (a first sort of patients), not as a replacement for the doctor. Only use it if the hospital judges a missed case to cost less than about 4–5 angiographies.
+**Recommendation:** the tree is not safe enough to decide alone who skips angiography. For a realistic cost of a missed disease (above about 4.7 angiographies), sending everybody is cheaper. Use it as a **triage aid** (to flag high-risk patients first), with the doctor keeping the final decision.
 
 **Limitations:**
-- Small, old data: 297 patients, one hospital, 1988, mostly men.
+- Small, old data: 297 patients, one hospital, 1980s, 68% men.
+- Selected patients: everyone in the data was already sent for angiography.
 - Only 75 test patients, so each patient is about 1.3 accuracy points. Small differences are noise.
 - The cost c is assumed, not measured.
 - `n_vessels` and `thal` are themselves medical tests, so the tree assumes they were already done.
@@ -135,3 +136,7 @@ Loss table, with costs in units of one angiography:
   - No. It comes from the loss table. The tree is frozen, only the threshold changes with c.
 - **So should the hospital use the tree?**
   - Not to decide alone: for a realistic cost of a missed disease (above about 4.7 angiographies), sending everybody is cheaper. It is a triage aid.
+- **Why are "asymptomatic" patients the most often sick (73%, vs 30% for typical angina)?**
+  - Every patient in the data had an angiography, since that is where the diagnosis comes from.
+  - A patient without chest pain was only sent if something else looked worrying (for example an abnormal exercise test), so this group is already high-risk.
+  - So the tree learns the risk among patients a doctor already found worrying. Using it on all patients with chest symptoms would be an extrapolation. This is in our limitations.

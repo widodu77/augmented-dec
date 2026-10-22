@@ -16,7 +16,7 @@ A patient arrives with chest symptoms. Angiography is the invasive test that con
 |---|---|
 | **Prediction** | Does the patient have heart disease? (yes / no) |
 | **Decision** | Send the patient for angiography, or not |
-| **Metrics** | Accuracy and recall for the classifier. Average cost per patient for the decision |
+| **Metrics** | Accuracy, recall and specificity for the classifier. Average cost per patient for the decision |
 | **Approach** | Option 1 of the brief: train and evaluate a decision-tree classifier |
 
 ## Data
@@ -26,7 +26,8 @@ Janosi, A., Steinbrunn, W., Pfisterer, M., and Detrano, R. (1989). *Heart Diseas
 
 - 303 patients and 13 inputs (age, sex, chest pain type, blood pressure, cholesterol, exercise ECG, and others).
 - Target: the original 0–4 diagnosis turned into yes / no. 46% of patients have disease.
-- 6 patients with a missing value were dropped, which leaves 297.
+- 6 patients with a missing value were dropped, which leaves 297 (68% men, aged 29–77).
+- Every patient in the data had an angiography (that is where the diagnosis comes from), so they were all already judged worrying enough to be tested.
 
 ## Method
 
@@ -70,10 +71,11 @@ The tree with the cost rule is cheaper than sending everybody only while a miss 
 
 ## Recommendation
 
-The tree is **not safe enough to decide alone** who skips angiography: for a realistic cost of a missed disease (more than about 5 angiographies), sending everybody is cheaper and safer. It is useful as a **triage aid**, to flag high-risk patients first, while the doctor keeps the final decision. Using it as a filter would require the hospital to state its cost c explicitly.
+The tree is **not safe enough to decide alone** who skips angiography: for a realistic cost of a missed disease (more than about 4.7 angiographies), sending everybody is cheaper and safer. It is useful as a **triage aid**, to flag high-risk patients first, while the doctor keeps the final decision. Using it as a filter would require the hospital to state its cost c explicitly.
 
 **Limitations:**
-- The data is small and old: 297 patients from one hospital in 1988, mostly men.
+- The data is small and old: 297 patients from one hospital, collected in the 1980s, 68% men.
+- Every patient was already sent for angiography, so the tree estimates the risk among patients a doctor already found worrying, not among all patients with chest symptoms.
 - With only 75 test patients, one patient is worth 1.3 accuracy points (±16 points at 95%).
 - A single tree is unstable: a different random split can give a different depth and a different root question.
 - `n_vessels` and `thal` are extra tests; without them the tree loses a few points.
