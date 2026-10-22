@@ -119,7 +119,19 @@ Loss table, with costs in units of one angiography:
   - The difference is a single patient out of 75, so it is noise.
   - The 1/c rule is the right rule in expectation. One small test set won't always show it.
 - **Is the tree stable?**
-  - Not fully. A different random split can give a somewhat different tree. This is a known weakness of single trees.
+  - The performance is: over 30 random splits, test accuracy averages 76.3% (range 67–88%) and beats the baseline every time.
+  - The exact tree is not: the depth and even the root question (`thal`, chest pain or `n_vessels`) change between splits. These variables carry the same signal. This is a known weakness of single trees.
 - **Did you tune for cost instead of accuracy?**
-  - No. We tuned for accuracy and then applied the cost threshold.
-  - The lecture suggests selecting with the decision loss. We checked, and it gives a similar depth here.
+  - The main tree is tuned for accuracy, then the cost threshold is applied.
+  - We also tuned for the cost at c = 3 (notebook section 9.1). It picks a different tree (depth 3, 7 leaves) with almost the same test cost (0.88 vs 0.85, about 2 patients). The conclusion does not change.
+- **Are `n_vessels` and `thal` known when the doctor decides?**
+  - They come from extra imaging tests, so maybe not.
+  - Without them (section 9.2), the tree keeps asymptomatic chest pain as its root question, reaches 74.7% on our test set (72.9% on average over 30 splits) and has the same cost at c = 3.
+- **How precise is 77.3% on 75 patients?**
+  - The Hoeffding bound from Lecture 2 gives about ±16 points at 95%. Small differences between models are noise; the gap to the baseline is confirmed on all 30 splits.
+- **Why is the CV score (82.4%) higher than the test score (77.3%)?**
+  - We picked the best of 40 settings, so the winning CV score is optimistic (Lecture 2). On average over 30 splits the gap is smaller (78.4% vs 76.3%).
+- **Is the 1/c threshold tuned on the test set?**
+  - No. It comes from the loss table. The tree is frozen, only the threshold changes with c.
+- **So should the hospital use the tree?**
+  - Not to decide alone: for a realistic cost of a missed disease (above about 4.7 angiographies), sending everybody is cheaper. It is a triage aid.

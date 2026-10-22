@@ -4,7 +4,7 @@
 
 **Presentation:** [open the slides](https://claude.ai/artifact/Qsz1obyqwfsjxnZFMKY6LM)
 
-**Team:** [Team member names]
+**Team:** Andrea, Walid, Ghali & Paul
 
 ---
 
@@ -36,13 +36,15 @@ Janosi, A., Steinbrunn, W., Pfisterer, M., and Detrano, R. (1989). *Heart Diseas
 4. **Tree.** Splits are chosen by Gini impurity, G(q) = 2q(1 − q). The notebook checks the first split by hand.
 5. **Tuning.** 5-fold cross-validation on the training set, over depth 1–10 and minimum leaf size {1, 5, 10, 20}.
 6. **Decision.** A missed sick patient costs c angiographies, so the Bayes rule is to send the patient when p > 1/c. We do not know c, so we compare several values.
+7. **Robustness.** Tuning for cost instead of accuracy, a tree without the two extra imaging tests, the whole procedure on 30 random splits, and a Hoeffding bound on the test score.
 
 ## Results
 
-| Model (75 test patients) | Accuracy | Recall |
-|---|---|---|
-| Always "no disease" | 53.3% | 0% |
-| Decision tree (depth 4, ≥ 10 patients per leaf) | **77.3%** | **68.6%** |
+| Model (75 test patients) | Accuracy | Recall | Specificity |
+|---|---|---|---|
+| Always "no disease" | 53.3% | 0% | 100% |
+| Stump (1 question, reference) | 74.7% | 71.4% | 77.5% |
+| Decision tree (depth 4, ≥ 10 patients per leaf) | **77.3%** | **68.6%** | **85.0%** |
 
 - The most important inputs are asymptomatic chest pain, the number of blocked vessels, and the thallium test.
 - Average cost per test patient (1 = one angiography):
@@ -51,16 +53,31 @@ Janosi, A., Steinbrunn, W., Pfisterer, M., and Detrano, R. (1989). *Heart Diseas
 |---|---|---|---|
 | 2 | 0.93 | 1.00 | **0.69** |
 | 3 | 1.40 | 1.00 | **0.85** |
+| 4 | 1.87 | 1.00 | **0.93** |
 | 5 | 2.33 | **1.00** | 1.04 |
 | 10 | 4.67 | **1.00** | 1.23 |
 
-**Recommendation:** use the tree as a triage aid, not as a replacement for the doctor. Only use it if a missed case is judged to cost less than about 4–5 angiographies. Above that, sending everybody is as good or better.
+The tree with the cost rule is cheaper than sending everybody only while a miss costs less than about **4.7 angiographies**.
+
+## Robustness checks (notebook section 9)
+
+| Question | Check | Answer |
+|---|---|---|
+| Does tuning for cost instead of accuracy change things? | Same grid, CV scored by the average cost at c = 3 | Different tree (depth 3, 7 leaves), almost the same test cost (0.88 vs 0.85). Same conclusion. |
+| Are all inputs known before the decision? | Tree without `n_vessels` and `thal` (extra imaging tests) | 74.7% test accuracy instead of 77.3%, same cost at c = 3. Still clearly useful. |
+| Is our split lucky? | Whole procedure repeated on 30 random splits | Mean test accuracy 76.3% (range 67–88%), beats the baseline on 30/30 splits. Depth and root question change between splits. |
+| How precise is one test score? | Hoeffding bound from Lecture 2, 75 patients | About ±16 points at 95%. Small differences between models are noise. |
+
+## Recommendation
+
+The tree is **not safe enough to decide alone** who skips angiography: for a realistic cost of a missed disease (more than about 5 angiographies), sending everybody is cheaper and safer. It is useful as a **triage aid**, to flag high-risk patients first, while the doctor keeps the final decision. Using it as a filter would require the hospital to state its cost c explicitly.
 
 **Limitations:**
 - The data is small and old: 297 patients from one hospital in 1988, mostly men.
-- With only 75 test patients, one patient is worth 1.3 accuracy points.
-- The cost c is assumed, not measured.
-- A single tree is unstable: a different random split can give a different tree.
+- With only 75 test patients, one patient is worth 1.3 accuracy points (±16 points at 95%).
+- A single tree is unstable: a different random split can give a different depth and a different root question.
+- `n_vessels` and `thal` are extra tests; without them the tree loses a few points.
+- The cost c is assumed, not measured, and the loss table ignores the risk of the angiography itself.
 
 ## Repository layout
 
@@ -75,7 +92,7 @@ Janosi, A., Steinbrunn, W., Pfisterer, M., and Detrano, R. (1989). *Heart Diseas
 
 ## How to run
 
-Uses Python 3.12. From the repository folder, install the packages:
+Tested with Python 3.11, scikit-learn 1.8.0, pandas 2.3.3, NumPy 2.4.6, matplotlib 3.10.9. The 30-split stability check takes under a minute. From the repository folder, install the packages:
 
 ```bash
 pip install -r requirements.txt
